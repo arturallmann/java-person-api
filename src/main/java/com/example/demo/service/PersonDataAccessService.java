@@ -4,6 +4,7 @@ import com.example.demo.dao.PersonDao;
 import com.example.demo.model.Person;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -21,13 +22,17 @@ public class PersonDataAccessService implements PersonDao {
     }
 
     @Override
-    public int insertPerson(UUID id, Person person) {
-        return 0;
+    public int insertPerson(@Nullable UUID id, Person person) {
+        final String sql = "INSERT INTO person VALUES (?, ?);";
+        UUID insertedId = id != null  ? id : UUID.randomUUID();
+        return jdbcTemplate.update(sql, insertedId, person.getName());
+
+
     }
 
     @Override
     public List<Person> selectAllPeople() {
-        final String sql = "SELECT id, name FROM person";
+        final String sql = "SELECT id, name FROM person;";
         List<Person> people = jdbcTemplate.query(sql, (resultSet, i) -> {
             UUID id = UUID.fromString(resultSet.getString("id"));
             String name = resultSet.getString("name");
@@ -52,11 +57,14 @@ public class PersonDataAccessService implements PersonDao {
 
     @Override
     public int deletePersonById(UUID id) {
-        return 0;
+        final String sql = "DELETE FROM person WHERE id = ?";
+        return jdbcTemplate.update(sql, id);
     }
 
     @Override
     public int updatePersonById(UUID id, Person person) {
-        return 0;
+        final String sql = "UPDATE person  SET name = ? WHERE id = ?";
+        return jdbcTemplate.update(sql, person.getName(), id);
+
     }
 }
